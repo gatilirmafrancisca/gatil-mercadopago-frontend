@@ -16,6 +16,14 @@ Funcionalidade: Página de doação avulsa (frontend)
     E eu clico em "Doar agora"
     Então devo ser redirecionado para o link de pagamento do Mercado Pago
 
+  Cenário: Valor pré-definido preenche o campo e editar o campo desmarca o preset
+    Quando eu acesso "/doar"
+    E eu seleciono o valor pré-definido de R$ 50
+    Então o campo de valor da doação deve mostrar "50"
+    E o valor pré-definido de R$ 50 deve estar selecionado
+    Quando eu digito "60" no campo de valor da doação
+    Então o valor pré-definido de R$ 50 não deve estar selecionado
+
   Cenário: Valor abaixo do mínimo mantém o botão desabilitado
     Quando eu acesso "/doar"
     E eu digito "0" no campo de valor da doação

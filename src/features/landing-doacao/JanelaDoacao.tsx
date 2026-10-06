@@ -69,7 +69,7 @@ export function JanelaDoacao({ aberta, valorInicial, onFechar }: Props) {
                 <button
                   key={valor}
                   type="button"
-                  className={selectedAmount === valor && customAmount === "" ? "preset ativo" : "preset"}
+                  className={selectedAmount === valor ? "preset ativo" : "preset"}
                   onClick={() => selectPreset(valor)}
                 >
                   <span className="coracao" />
