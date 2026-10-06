@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { criarPagamentoDoacao } from "@/lib/api/doacao";
 import { MIN_DONATION_AMOUNT } from "@/features/donation/constants";
 import { registrarInicioDoacao } from "@/lib/analytics/rastreamento";
+import { coletarRastreio } from "@/lib/analytics/identificadores";
 import { utmsAceitas } from "@/features/donation/utm";
 
 interface UseDonationFormArgs {
@@ -18,9 +19,21 @@ export function useDonationForm({ utm }: UseDonationFormArgs) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  // Ao voltar do Mercado Pago pelo botão "voltar", o navegador restaura a
+  // página do cache (bfcache) com o estado de quando saiu: botão travado em
+  // "Abrindo pagamento...". Destrava para a pessoa poder doar de novo.
+  useEffect(() => {
+    function aoVoltar(evento: PageTransitionEvent) {
+      if (evento.persisted) setIsSubmitting(false);
+    }
+    window.addEventListener("pageshow", aoVoltar);
+    return () => window.removeEventListener("pageshow", aoVoltar);
+  }, []);
+
+  // O valor do preset também aparece no campo; editar o campo desmarca o preset.
   function selectPreset(value: number) {
     setSelectedAmount(value);
-    setCustomAmount("");
+    setCustomAmount(String(value));
   }
 
   function updateCustomAmount(value: string) {
@@ -51,6 +64,7 @@ export function useDonationForm({ utm }: UseDonationFormArgs) {
       const { initPoint } = await criarPagamentoDoacao({
         valor: numericAmount,
         ...utmsAceitas(utm),
+        rastreio: await coletarRastreio(),
       });
       registrarInicioDoacao(numericAmount);
       window.location.href = initPoint;

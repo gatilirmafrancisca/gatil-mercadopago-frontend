@@ -78,6 +78,22 @@ When(
 
 // ---------- asserts ----------
 
+function botaoPreset(page: Page, valor: number) {
+  return page.getByRole("button", { name: new RegExp(`^R\\$\\s*${valor}(,00)?$`) });
+}
+
+Then("o campo de valor da doação deve mostrar {string}", async ({ page }, valor: string) => {
+  await expect(page.getByLabel("Outro valor")).toHaveValue(valor);
+});
+
+Then("o valor pré-definido de R$ {int} deve estar selecionado", async ({ page }, valor: number) => {
+  await expect(botaoPreset(page, valor)).toHaveClass(/\bativo\b/);
+});
+
+Then("o valor pré-definido de R$ {int} não deve estar selecionado", async ({ page }, valor: number) => {
+  await expect(botaoPreset(page, valor)).not.toHaveClass(/\bativo\b/);
+});
+
 Then(
   "devo ser redirecionado para o link de pagamento do Mercado Pago",
   async ({ page }) => {
