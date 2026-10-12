@@ -5,7 +5,7 @@ import { registrarInicioDoacao } from "@/lib/analytics/rastreamento";
 import { coletarRastreio } from "@/lib/analytics/identificadores";
 import { utmsAceitas } from "@/features/donation/utm";
 import { marcarSaidaParaPagamento } from "@/features/landing-doacao/retornoPagamento";
-import { pixNoSiteAtivo } from "@/features/donation/pixNoSite";
+import { pixNoSiteAtivo } from "@/features/pix/pixNoSite";
 import type { PixCriado } from "@/features/donation/types";
 
 export type FormaPagamento = "pix" | "cartao";
