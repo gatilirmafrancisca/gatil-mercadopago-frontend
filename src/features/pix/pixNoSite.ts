@@ -1,9 +1,9 @@
 /**
- * Pix dentro do site (Checkout Transparente só pro Pix).
+ * Pix dentro do site (Checkout Transparente só pro Pix), na doação (/doar) e
+ * na rifa (/rifa).
  *
- * Fica DESLIGADO até o backend ter os endpoints /doacao/criar-pix e
- * /doacao/status/:paymentId. Desligado, a janela de doação funciona como antes
- * (tudo pelo Checkout Pro). Pra ligar em produção: VITE_PIX_NO_SITE=true na Vercel.
+ * O Checkout Pro do backend aceita só cartão: com isso DESLIGADO, nem a doação
+ * nem a rifa oferecem Pix. Pra ligar em produção: VITE_PIX_NO_SITE=true na Vercel.
  *
  * Pra testar sem mexer no ambiente (testes E2E, homologação), também liga com
  * localStorage.setItem("gatil_pix_no_site", "1").

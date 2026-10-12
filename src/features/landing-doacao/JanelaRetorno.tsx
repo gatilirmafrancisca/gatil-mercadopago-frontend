@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import imgCatChica from "@/assets/doacao/cat-chica.webp";
 import { consumirRetornoPagamento } from "@/features/landing-doacao/retornoPagamento";
-import { pixNoSiteAtivo } from "@/features/donation/pixNoSite";
+import { pixNoSiteAtivo } from "@/features/pix/pixNoSite";
 
 /**
  * Aparece quando a pessoa volta do Mercado Pago para /doar (caso típico do Pix,

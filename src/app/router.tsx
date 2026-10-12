@@ -5,7 +5,7 @@ import { RaffleLayout } from "@/app/RaffleLayout";
 import { RootLayout } from "@/app/RootLayout";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { ChooseNumberPage, chooseNumberLoader } from "@/pages/ChooseNumberPage";
-import { PagarPage } from "@/pages/PagarPage";
+import { RifaPage } from "@/pages/RifaPage";
 import { PagamentoPendentePage } from "@/pages/PagamentoPendentePage";
 import { PagamentoRecusadoPage } from "@/pages/PagamentoRecusadoPage";
 import { DoacaoRecusadaPage } from "@/pages/DoacaoRecusadaPage";
@@ -29,9 +29,10 @@ export const router = createBrowserRouter([
       {
         element: <RaffleLayout />,
         children: [
-          { path: "rifa", element: <PagarPage /> },
+          // Landing da rifa: Pix na tela ou cartão pelo Mercado Pago
+          { path: "rifa", element: <RifaPage /> },
           // Alias mantido pros links antigos já divulgados.
-          { path: "rifa/pagar", element: <PagarPage /> },
+          { path: "rifa/pagar", element: <RifaPage /> },
           { path: "rifa/pagamento-aprovado", element: <ChooseNumberPage />, loader: chooseNumberLoader },
           { path: "rifa/pagamento-pendente", element: <PagamentoPendentePage /> },
           { path: "rifa/pagamento-recusado", element: <PagamentoRecusadoPage /> },
