@@ -9,6 +9,7 @@ import {
   TOTAL_NUMBERS,
 } from "@/features/raffle/constants";
 import { formatCurrencyBRL } from "@/lib/utils/format";
+import { instalarComandoPixTeste } from "@/features/pix/pixTeste";
 import imgCatFami from "@/assets/doacao/cat-fami.webp";
 
 const PASSOS = [
@@ -34,6 +35,8 @@ const PASSOS = [
 export function RifaPage() {
   useEffect(() => {
     document.title = "Rifa Solidária - Gatil Irmã Francisca";
+    // Pix de teste de R$ 0,01: gatilPixTeste("<chave>") no console (pixTeste.ts)
+    instalarComandoPixTeste();
   }, []);
 
   return (

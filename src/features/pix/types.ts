@@ -9,6 +9,10 @@ export interface PixCriado {
   qrCodeBase64: string;
   /** Data de expiração do Pix (ISO) */
   expiraEm: string;
+  /** Só na rifa: valor cobrado (R$ 0,01 no Pix de teste) */
+  valor?: number;
+  /** Só na rifa: Pix de teste (gatilPixTeste no console) */
+  teste?: boolean;
 }
 
 /** Status do Pix no backend (o mapearStatusMP, mais EXPIRADO) */

@@ -4,6 +4,7 @@ import type {
   ConfirmNumberResponse,
 } from "@/features/raffle/types";
 import type { PixCriado, StatusPix } from "@/features/pix/types";
+import { chavePixTeste } from "@/features/pix/pixTeste";
 
 /**
  * Camada de acesso à API da rifa. As páginas/hooks nunca chamam
@@ -48,7 +49,13 @@ export async function criarPagamentoRifa(origem: OrigemRifa): Promise<{ initPoin
 
 /** Pix dentro do site: o backend cria o Pix do bilhete no Mercado Pago e devolve o QR code. */
 export async function criarPixRifa(payload: { email: string } & OrigemRifa): Promise<PixCriado> {
-  const response = await apiClient.post<{ message: string; data: PixCriado }>("/rifa/criar-pix", payload);
+  // Com o modo teste ligado (pixTeste.ts), o backend gera o Pix de R$ 0,01.
+  const chave = chavePixTeste();
+  const response = await apiClient.post<{ message: string; data: PixCriado }>(
+    "/rifa/criar-pix",
+    payload,
+    chave ? { headers: { "x-pix-teste": chave } } : undefined
+  );
   return response.data;
 }
 

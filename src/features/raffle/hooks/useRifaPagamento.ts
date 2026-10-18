@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { consultarStatusPixRifa, criarPagamentoRifa, criarPixRifa } from "@/lib/api/raffle";
 import { pixNoSiteAtivo } from "@/features/pix/pixNoSite";
+import { chavePixTeste } from "@/features/pix/pixTeste";
 import { usePixAcompanhamento } from "@/features/pix/usePixAcompanhamento";
 import type { PixCriado } from "@/features/pix/types";
 import { utmsAceitas } from "@/features/donation/utm";
-import { RAFFLE_ROUTES } from "@/features/raffle/constants";
+import { RAFFLE_ROUTES, TICKET_PRICE_BRL } from "@/features/raffle/constants";
 import { ApiRequestError } from "@/types/api";
 
 export type FormaPagamentoRifa = "pix" | "cartao";
@@ -17,6 +18,9 @@ const PAUSA_APROVADO_MS = 1800;
 const EMAIL_VALIDO = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 const ERRO_ESGOTADO = "Os números desta rifa já foram todos vendidos. Obrigado pelo carinho com o Gatil!";
+
+/** Valor do Pix de teste (o backend é quem decide; isso é só pra mostrar antes de gerar). */
+const VALOR_PIX_TESTE_BRL = 0.01;
 
 interface UseRifaPagamentoArgs {
   utm: { utmSource: string | null; utmMedium: string | null; utmCampaign: string | null };
@@ -31,7 +35,9 @@ interface UseRifaPagamentoArgs {
  */
 export function useRifaPagamento({ utm }: UseRifaPagamentoArgs) {
   const navigate = useNavigate();
-  const [pixAtivo] = useState(pixNoSiteAtivo);
+  // Modo teste (gatilPixTeste no console): Pix de R$ 0,01, mesmo sem VITE_PIX_NO_SITE.
+  const [modoTeste] = useState(() => chavePixTeste() !== null);
+  const [pixAtivo] = useState(() => pixNoSiteAtivo() || modoTeste);
   const [forma, setFormaEstado] = useState<FormaPagamentoRifa>(pixAtivo ? "pix" : "cartao");
   const [email, setEmailEstado] = useState("");
   const [pix, setPix] = useState<PixCriado | null>(null);
@@ -79,6 +85,9 @@ export function useRifaPagamento({ utm }: UseRifaPagamentoArgs) {
   }
 
   function mensagemDeErro(err: unknown, padrao: string) {
+    if (err instanceof ApiRequestError && err.status === 403 && modoTeste) {
+      return "Chave de teste inválida. Confira a PIX_TESTE_CHAVE do backend e rode gatilPixTeste de novo.";
+    }
     return err instanceof ApiRequestError && err.status === 409 ? ERRO_ESGOTADO : padrao;
   }
 
@@ -114,8 +123,13 @@ export function useRifaPagamento({ utm }: UseRifaPagamentoArgs) {
     }
   }
 
+  // No Pix, o valor que vale é o que o backend cobrou.
+  const valorPix = pix?.valor ?? (modoTeste ? VALOR_PIX_TESTE_BRL : TICKET_PRICE_BRL);
+
   return {
     pixAtivo,
+    modoTeste,
+    valorPix,
     forma,
     setForma,
     usaPix,
