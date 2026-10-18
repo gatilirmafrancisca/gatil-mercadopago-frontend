@@ -7,7 +7,7 @@ import { TICKET_PRICE_BRL } from "@/features/raffle/constants";
 import { useUtmParams } from "@/hooks/useUtmParams";
 import { formatCurrencyBRL } from "@/lib/utils/format";
 
-const VALOR = formatCurrencyBRL(TICKET_PRICE_BRL);
+const VALOR_BILHETE = formatCurrencyBRL(TICKET_PRICE_BRL);
 
 function tempoRestante(segundos: number) {
   const m = Math.floor(segundos / 60);
@@ -20,6 +20,14 @@ function AvisoResponsavel() {
     <p className="mt-4 rounded-2xl bg-creme/70 p-3 text-xs leading-relaxed text-carvao/75">
       <strong>No Pix, o recebedor aparece como Ana Paula de Sousa Farias,</strong> responsável legal pelo Gatil
       Irmã Francisca. Pode seguir tranquilo: o pagamento chega ao Gatil.
+    </p>
+  );
+}
+
+function AvisoModoTeste({ valor }: { valor: string }) {
+  return (
+    <p className="mb-4 rounded-2xl border-2 border-dashed border-laranja bg-laranja/10 p-3 text-xs font-bold text-carvao" role="note">
+      🧪 Modo teste — Pix de {valor}. Só esta aba vê esse valor; pra sair, rode gatilPixTeste(null) no console.
     </p>
   );
 }
@@ -78,6 +86,8 @@ export function PagamentoRifa() {
   const utm = useUtmParams();
   const {
     pixAtivo,
+    modoTeste,
+    valorPix,
     forma,
     setForma,
     usaPix,
@@ -93,6 +103,9 @@ export function PagamentoRifa() {
     limparPix,
   } = useRifaPagamento({ utm });
   const [copiado, setCopiado] = useState(false);
+  // No Pix, o valor vem do backend (R$ 0,01 no modo teste); no cartão, é o do bilhete.
+  const VALOR = usaPix || pix ? formatCurrencyBRL(valorPix) : VALOR_BILHETE;
+  const avisoTeste = modoTeste && <AvisoModoTeste valor={formatCurrencyBRL(valorPix)} />;
   const codigoPix = useRef<HTMLElement>(null);
 
   useEffect(() => setCopiado(false), [pix?.paymentId]);
@@ -163,6 +176,7 @@ export function PagamentoRifa() {
     const qrSrc = pix.qrCodeBase64.startsWith("data:") ? pix.qrCodeBase64 : `data:image/png;base64,${pix.qrCodeBase64}`;
     return (
       <Card>
+        {avisoTeste}
         <h2 className="mb-1 font-display text-2xl font-bold text-verde-escuro">Seu Pix de {VALOR} está pronto</h2>
         <p className="mb-4 text-sm text-carvao/70">
           Pague pelo app do seu banco. Assim que o Pix cair, a gente te leva pra escolher seu número.
@@ -206,6 +220,7 @@ export function PagamentoRifa() {
 
   return (
     <Card>
+      {avisoTeste}
       <h2 className="mb-1 font-display text-2xl font-bold text-verde-escuro">Garanta seu número</h2>
       <p className="mb-4 text-sm text-carvao/70">
         Cada número custa <strong>{VALOR}</strong>. Depois do pagamento, você escolhe o seu na hora.
