@@ -9,6 +9,24 @@ Funcionalidade: Página de doação avulsa (frontend)
     Então devo ser redirecionado para o link de pagamento do Mercado Pago
     E a origem enviada ao backend deve ser "instagram" e "organico"
 
+  Cenário: Tag de UTM criada no painel é repassada sem mudar o site
+    Dado que o painel cadastrou a tag de origem "TIKTOK"
+    E que "/api/doacao/criar-pagamento" devolve um link de pagamento válido
+    Quando eu acesso "/doar?utm_source=tiktok&utm_medium=pago"
+    E eu seleciono o valor pré-definido de R$ 50
+    E eu clico em "Doar agora"
+    Então devo ser redirecionado para o link de pagamento do Mercado Pago
+    E a origem enviada ao backend deve ser "tiktok" e "pago"
+
+  Cenário: Sem a lista de tags, a doação segue (só sem a origem)
+    Dado que a lista de tags de UTM está fora do ar
+    E que "/api/doacao/criar-pagamento" devolve um link de pagamento válido
+    Quando eu acesso "/doar?utm_source=instagram&utm_medium=organico"
+    E eu seleciono o valor pré-definido de R$ 50
+    E eu clico em "Doar agora"
+    Então devo ser redirecionado para o link de pagamento do Mercado Pago
+    E a origem enviada ao backend deve ser nula
+
   Cenário: Digitar um valor personalizado válido
     Dado que "/api/doacao/criar-pagamento" devolve um link de pagamento válido
     Quando eu acesso "/doar"
