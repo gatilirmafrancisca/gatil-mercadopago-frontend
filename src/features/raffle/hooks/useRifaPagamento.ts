@@ -93,7 +93,7 @@ export function useRifaPagamento({ utm }: UseRifaPagamentoArgs) {
 
   async function gerarPix() {
     try {
-      setPix(await criarPixRifa({ email: email.trim(), ...utmsAceitas(utm) }));
+      setPix(await criarPixRifa({ email: email.trim(), ...(await utmsAceitas(utm)) }));
     } catch (err) {
       setSubmitError(mensagemDeErro(err, "Não conseguimos gerar o Pix agora. Tenta de novo em instantes."));
     } finally {
@@ -113,7 +113,7 @@ export function useRifaPagamento({ utm }: UseRifaPagamentoArgs) {
     }
 
     try {
-      const { initPoint } = await criarPagamentoRifa(utmsAceitas(utm));
+      const { initPoint } = await criarPagamentoRifa(await utmsAceitas(utm));
       window.location.href = initPoint;
     } catch (err) {
       setSubmitError(

@@ -113,6 +113,15 @@ async function rotear(metodo: string, url: URL, corpo: any): Promise<Response | 
   const caminho = url.pathname.replace(/^\/api/, "")
   varrer()
 
+  // ---------- tags de UTM (no backend real, vêm da seção "UTM" do painel) ----------
+  if (metodo === "GET" && caminho === "/utm/tags") {
+    return json(200, { message: "ok", data: {
+      source: ["LANDING_PAGE", "INSTAGRAM", "FACEBOOK", "FEIRA_ADOCAO"],
+      medium: ["ORGANICO", "PAGO"],
+      campaign: ["CAMPANHA_ESPECIFICA", "RIFA_SOLIDARIA"],
+    } })
+  }
+
   // ---------- quadro ----------
   if (metodo === "GET" && caminho === "/rifa/numeros-ocupados") {
     return json(200, { message: "ok", data: [...ocupados].sort((a, b) => a - b) })

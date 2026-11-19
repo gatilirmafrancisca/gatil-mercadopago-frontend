@@ -92,7 +92,7 @@ export function useDonationForm({ utm }: UseDonationFormArgs) {
       const criado = await criarPix({
         valor,
         email: email.trim(),
-        ...utmsAceitas(utm),
+        ...(await utmsAceitas(utm)),
         rastreio: await coletarRastreio(),
       });
       registrarInicioDoacao(valor);
@@ -118,7 +118,7 @@ export function useDonationForm({ utm }: UseDonationFormArgs) {
     try {
       const { initPoint } = await criarPagamentoDoacao({
         valor: numericAmount,
-        ...utmsAceitas(utm),
+        ...(await utmsAceitas(utm)),
         rastreio: await coletarRastreio(),
       });
       registrarInicioDoacao(numericAmount);

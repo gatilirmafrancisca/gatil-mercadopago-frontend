@@ -5,10 +5,33 @@ const { Given, When, Then, Before } = createBdd();
 
 // O aviso de cookies aparece na primeira visita e ficaria por cima dos botões:
 // cada cenário começa com uma escolha já registrada (nenhum rastreamento).
+// Tags de UTM ativas (no backend real, vêm da seção "UTM" do painel).
+export const TAGS_UTM_PADRAO = {
+  source: ["LANDING_PAGE", "INSTAGRAM", "FACEBOOK", "FEIRA_ADOCAO"],
+  medium: ["ORGANICO", "PAGO"],
+  campaign: ["CAMPANHA_ESPECIFICA", "RIFA_SOLIDARIA"],
+};
+
 Before(async ({ page }) => {
   await page.addInitScript(() =>
     localStorage.setItem("gatil_cookie_consent", JSON.stringify({ stats: false, marketing: false, timestamp: Date.now() }))
   );
+  await page.route("**/api/utm/tags", (route) =>
+    route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ message: "ok", data: TAGS_UTM_PADRAO }) })
+  );
+});
+
+Given("que o painel cadastrou a tag de origem {string}", async ({ page }, codigo: string) => {
+  await page.route("**/api/utm/tags", (route) =>
+    route.fulfill({
+      status: 200, contentType: "application/json",
+      body: JSON.stringify({ message: "ok", data: { ...TAGS_UTM_PADRAO, source: [...TAGS_UTM_PADRAO.source, codigo] } }),
+    })
+  );
+});
+
+Given("que a lista de tags de UTM está fora do ar", async ({ page }) => {
+  await page.route("**/api/utm/tags", (route) => route.fulfill({ status: 500, body: "{}" }));
 });
 
 // Na landing, o valor é escolhido numa janela que abre pelo botão "Quero doar".
@@ -111,6 +134,12 @@ Then(
     expect(body?.utmMedium).toBe(utmMedium);
   }
 );
+
+Then("a origem enviada ao backend deve ser nula", async ({ page }) => {
+  const body = (page as unknown as { _ultimaRequisicaoDoacao?: Record<string, unknown> })._ultimaRequisicaoDoacao;
+  expect(body?.utmSource ?? null).toBeNull();
+  expect(body?.utmMedium ?? null).toBeNull();
+});
 
 // Os caminhos antigos /doacao-* não podem redirecionar pra lugar nenhum:
 // a URL tem que continuar exatamente a mesma.

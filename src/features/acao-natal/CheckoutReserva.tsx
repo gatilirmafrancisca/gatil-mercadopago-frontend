@@ -164,7 +164,7 @@ export function CheckoutReserva({ selected, onRemove, onRandom, onTaken, onCompl
     if (turnstileAtivo && !turnstileToken) { setAviso("Só um instante: estamos confirmando que você não é um robô."); return }
     setOcupado(true); setAviso("")
     try {
-      const nova = await reservarNumeros(selected, utmsAceitas(utm), turnstileToken)
+      const nova = await reservarNumeros(selected, await utmsAceitas(utm), turnstileToken)
       if (nova.indisponiveis.length) {
         onTaken(nova.indisponiveis)
         setAviso(`Ih, alguém tirou o ${nova.indisponiveis.map(pad).join(", ")} um segundo antes de você. Os outros continuam guardados, e o total foi atualizado.`)
