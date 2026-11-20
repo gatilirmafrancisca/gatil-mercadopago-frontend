@@ -398,6 +398,9 @@
 .lp .link-texto { padding: 6px 0; border: 0; background: none; color: var(--preto); font: inherit; font-size: .95rem; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 /* enquanto o aviso está na tela, a barra fixa de doação espera */
 html[data-aviso-cookies] .lp .barra { visibility: hidden; }
+/* O aviso de cookies fica no RootLayout, fora da página: o invólucro não ocupa espaço */
+.lp.lp-avisos { overflow: visible; background: none; }
+html[data-aviso-cookies] .acao .selection-bar { visibility: hidden; }
 .lp .preferencia { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 2px solid var(--creme); text-align: left; }
 .lp .preferencia:last-of-type { border-bottom: 0; }
 .lp .preferencia strong { display: block; font-family: var(--titulo); }
