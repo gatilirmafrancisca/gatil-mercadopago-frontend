@@ -17,7 +17,8 @@ const servidor = (porta: number, comando: string, env: Record<string, string> = 
   command: comando,
   url: `http://localhost:${porta}`,
   reuseExistingServer: !process.env.CI,
-  env: { VITE_API_URL: "/api", ...env },
+  // GTM falso: os testes interceptam o googletagmanager.com, nada sai da máquina
+  env: { VITE_API_URL: "/api", VITE_GTM_ID: "GTM-TESTE", ...env },
 });
 
 export default defineConfig({

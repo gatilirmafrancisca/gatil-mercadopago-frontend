@@ -26,7 +26,10 @@ function lerFbc(): string | undefined {
   return fbclid ? `fb.1.${Date.now()}.${fbclid}` : undefined;
 }
 
-/** Pergunta ao gtag; se ele não responder a tempo, segue sem o valor. */
+/**
+ * O GA4 roda dentro do GTM. Primeiro pergunta ao Google tag; se ele não
+ * responder a tempo, lê os cookies que o GA4 grava (_ga e _ga_<ID>).
+ */
 function lerGtag(campo: "client_id" | "session_id"): Promise<string | undefined> {
   return new Promise((resolve) => {
     if (!GA4_ID || !window.gtag) return resolve(undefined);
@@ -38,13 +41,30 @@ function lerGtag(campo: "client_id" | "session_id"): Promise<string | undefined>
   });
 }
 
+/** _ga = "GA1.1.<client_id>": o client_id são os dois últimos blocos. */
+function clientIdDoCookie(): string | undefined {
+  const partes = lerCookie("_ga")?.split(".");
+  return partes && partes.length >= 4 ? partes.slice(-2).join(".") : undefined;
+}
+
+/** _ga_<ID> = "GS1.1.<session_id>.…" ou, no formato novo, "GS2.1.s<session_id>$o…". */
+function sessionIdDoCookie(): string | undefined {
+  if (!GA4_ID) return undefined;
+  const valor = lerCookie(`_ga_${GA4_ID.replace(/^G-/, "")}`);
+  const id = valor?.match(/^GS\d\.\d\.s?(\d+)/)?.[1];
+  return id || undefined;
+}
+
 export async function coletarRastreio(): Promise<RastreioDoacao> {
   const consentimento = lerConsentimento();
   const marketing = Boolean(consentimento?.marketing);
   const stats = Boolean(consentimento?.stats);
 
   const [gaClientId, gaSessionId] = stats
-    ? await Promise.all([lerGtag("client_id"), lerGtag("session_id")])
+    ? await Promise.all([
+        lerGtag("client_id").then((v) => v ?? clientIdDoCookie()),
+        lerGtag("session_id").then((v) => v ?? sessionIdDoCookie()),
+      ])
     : [undefined, undefined];
 
   return {

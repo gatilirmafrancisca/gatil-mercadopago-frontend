@@ -1,30 +1,52 @@
-// Ponto único de rastreamento das páginas de doação: respeita o consentimento.
+// Ponto único de rastreamento: respeita o consentimento.
+// - GTM (com o GA4 dentro): site inteiro, pelo RootLayout.
+// - Meta Pixel: só na campanha de doação, pelo LandingLayout.
 import { useEffect } from "react";
 import { aoMudarConsentimento, lerConsentimento } from "@/lib/analytics/consentimento";
 import { initMetaPixel, trackEvent, trackPageView } from "@/lib/analytics/metaPixel";
-import { gaEvent, gaPageView, initGA4 } from "@/lib/analytics/ga4";
+import {
+  aplicarConsentimentoGTM,
+  enviarEventoEcommerce,
+  enviarEventoGTM,
+  enviarPageView,
+  gtmCarregado,
+} from "@/lib/analytics/gtm";
 
-function carregarAutorizados() {
-  const consentimento = lerConsentimento();
-  if (consentimento?.marketing) initMetaPixel();
-  if (consentimento?.stats) initGA4();
-}
-
-/** Carrega o que foi autorizado e registra a visita a cada troca de página. */
-export function useRastreamento(pathname: string) {
+/** Site inteiro: carrega o GTM depois do aceite e registra cada troca de página. */
+export function useRastreamentoSite(pathname: string) {
   useEffect(() => {
-    carregarAutorizados();
-    trackPageView();
-    gaPageView();
+    aplicarConsentimentoGTM(lerConsentimento());
+    enviarPageView();
   }, [pathname]);
 
   // Se a pessoa aceitar durante a visita, a página atual também é registrada
   useEffect(
     () =>
       aoMudarConsentimento(() => {
-        carregarAutorizados();
+        const jaCarregado = gtmCarregado();
+        aplicarConsentimentoGTM(lerConsentimento());
+        if (!jaCarregado) enviarPageView();
+      }),
+    [],
+  );
+}
+
+function carregarPixelSeAutorizado() {
+  if (lerConsentimento()?.marketing) initMetaPixel();
+}
+
+/** Campanha de doação: Meta Pixel, exclusivo destas páginas. */
+export function usePixelDoacao(pathname: string) {
+  useEffect(() => {
+    carregarPixelSeAutorizado();
+    trackPageView();
+  }, [pathname]);
+
+  useEffect(
+    () =>
+      aoMudarConsentimento(() => {
+        carregarPixelSeAutorizado();
         trackPageView();
-        gaPageView();
       }),
     [],
   );
@@ -33,7 +55,7 @@ export function useRastreamento(pathname: string) {
 /** Início da doação: só chega às ferramentas que a pessoa autorizou. */
 export function registrarInicioDoacao(valor: number) {
   trackEvent("InitiateCheckout", { value: valor, currency: "BRL" });
-  gaEvent("generate_lead", { value: valor, currency: "BRL" });
+  enviarEventoGTM("generate_lead", { value: valor, currency: "BRL" });
 }
 
 /**
@@ -43,5 +65,5 @@ export function registrarInicioDoacao(valor: number) {
  */
 export function registrarDoacaoConcluida(valor: number, rastreioId: string) {
   trackEvent("Donate", { value: valor, currency: "BRL" }, { eventID: rastreioId });
-  gaEvent("purchase", { transaction_id: rastreioId, value: valor, currency: "BRL" });
+  enviarEventoEcommerce("purchase", { transaction_id: rastreioId, value: valor, currency: "BRL" });
 }

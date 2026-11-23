@@ -116,7 +116,8 @@ Then("devo ver um botão {string}", async ({ page }, texto: string) => {
 });
 
 Then("devo ver uma explicação sobre pagamento em processamento", async ({ page }) => {
-  await expect(page.getByText(/PIX/i)).toBeVisible();
+  // palavra inteira: "Meta Pixel" (preferências de cookies) não conta
+  await expect(page.getByText(/\bPIX\b/i)).toBeVisible();
 });
 
 Then("devo ver uma explicação de que o pagamento não foi aprovado", async ({ page }) => {

@@ -73,7 +73,8 @@ export function PoliticaPrivacidadePage() {
               de&nbsp;campanhas.
             </li>
             <li>
-              <strong>Google Analytics</strong>&nbsp;- métricas de&nbsp;navegação no&nbsp;site.
+              <strong>Google (Tag Manager e&nbsp;Analytics)</strong>&nbsp;- métricas de&nbsp;navegação no&nbsp;site;
+              o&nbsp;Tag&nbsp;Manager só&nbsp;organiza o&nbsp;carregamento dessas ferramentas.
             </li>
           </ul>
           <p>
@@ -83,8 +84,9 @@ export function PoliticaPrivacidadePage() {
 
           <h2>4. Cookies</h2>
           <p>
-            Este&nbsp;site usa cookies não&nbsp;essenciais (Meta&nbsp;Pixel,&nbsp;Google&nbsp;Analytics) para&nbsp;medir
-            campanhas e&nbsp;navegação. Eles&nbsp;só&nbsp;são&nbsp;ativados depois do&nbsp;seu&nbsp;consentimento,
+            Este&nbsp;site usa cookies não&nbsp;essenciais (Meta&nbsp;Pixel,&nbsp;Google&nbsp;Analytics, carregado
+            pelo&nbsp;Google&nbsp;Tag&nbsp;Manager) para&nbsp;medir campanhas e&nbsp;navegação, em&nbsp;todas
+            as&nbsp;páginas, inclusive na&nbsp;Ação de&nbsp;Natal. Eles&nbsp;só&nbsp;são&nbsp;ativados depois do&nbsp;seu&nbsp;consentimento,
             através do&nbsp;banner de&nbsp;cookies exibido ao&nbsp;entrar no&nbsp;site. Você pode mudar sua&nbsp;escolha
             a&nbsp;qualquer momento pelo&nbsp;link{" "}
             <button className="link-documento" type="button" onClick={abrirPreferenciasCookies}>

@@ -52,14 +52,14 @@ export const router = createBrowserRouter([
         ],
       },
       {
-        // Landing de doação e documentos: visual próprio, com aviso de cookies
+        // Landing de doação e documentos: visual próprio e Meta Pixel da campanha
         element: <LandingLayout />,
         children: [
           { path: "doar", element: <DoarPage /> },
           { path: "politica-de-privacidade", element: <PoliticaPrivacidadePage /> },
           { path: "termos", element: <TermosPage /> },
           // Retorno do checkout da doação (back_urls do backend): ficam sob /doar,
-          // separadas das da rifa, com o mesmo visual, aviso de cookies e rastreamento.
+          // separadas das da rifa, com o mesmo visual e o Pixel da doação.
           { path: "doar/pagamento-aprovado", element: <DoacaoConfirmadaPage /> },
           { path: "doar/pagamento-pendente", element: <DoacaoPendentePage /> },
           { path: "doar/pagamento-recusado", element: <DoacaoRecusadaPage /> },
