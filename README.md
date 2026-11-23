@@ -70,6 +70,25 @@ gatil-frontend/
 | `VITE_FLUXO_COMPLETO` | `true`: a Ação de Natal escolhe até 10 números, reserva por 15 min e paga o total. Vazio: paga primeiro e escolhe depois |
 | `VITE_TURNSTILE_SITE_KEY` | Site key do Cloudflare Turnstile (anti-robô na reserva). A chave secreta fica só no backend |
 | `VITE_API_MOCK` | Só em `npm run dev`: backend falso em memória (`src/mocks/mockApi.ts`). Nunca entra no build |
+| `VITE_GTM_ID` | Contêiner do Google Tag Manager (`GTM-5ZS5PP9K`). Só em Production na Vercel; vazio = sem GTM |
+| `VITE_GA4_ID` | ID de medição do GA4 configurado no GTM (`G-…`). Só serve para ler `client_id`/`session_id` e mandar ao backend |
+| `VITE_META_PIXEL_ID` | Meta Pixel, só nas páginas de doação |
+
+## Rastreamento (GTM, GA4 e Meta Pixel)
+
+- **Site inteiro:** o `RootLayout` mostra o aviso de cookies e carrega o Google Tag Manager (`src/lib/analytics/gtm.ts`). Consent Mode v2 no **modo básico**: o `gtm.js` só é baixado depois que a pessoa aceita estatísticos ou marketing. Antes disso, nada do Google roda.
+- **GA4 fica dentro do GTM.** O site não carrega mais o `gtag.js` direto (contaria em dobro); ele só publica eventos no `dataLayer`:
+
+| Evento no `dataLayer` | Quando | Parâmetros |
+|---|---|---|
+| `page_view_spa` | Toda troca de página (o GTM não vê as navegações do SPA sozinho) | `page_location`, `page_path`, `page_title` |
+| `generate_lead` | Início da doação | `value`, `currency` |
+| `purchase` | Pix da doação aprovado na tela | `ecommerce.transaction_id`, `ecommerce.value`, `ecommerce.currency` |
+
+  No contêiner: Google tag do GA4 com `send_page_view = false`, tag de evento `page_view` no gatilho personalizado `page_view_spa`, e as demais tags de evento com "Enviar dados de e-commerce". As permissões chegam pelo Consent Mode (`analytics_storage` = estatísticos; `ad_storage`, `ad_user_data`, `ad_personalization` = marketing).
+- **CSP:** tags "HTML personalizado" do GTM não rodam (a CSP não aceita script inline). Use os modelos nativos/da galeria; um domínio novo de script precisa entrar no `vercel.json`.
+- **Meta Pixel** continua no código, só no `LandingLayout` (campanha de doação).
+- O painel administrativo não tem rastreamento.
 
 ## Como rodar localmente
 
