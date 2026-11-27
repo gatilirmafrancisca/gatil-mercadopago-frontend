@@ -1,14 +1,11 @@
 import { useEffect } from "react";
-import { Outlet, ScrollRestoration, useLocation } from "react-router-dom";
+import { Outlet, ScrollRestoration } from "react-router-dom";
 import { Rodape } from "@/features/landing-doacao/secoes/Rodape";
-import { usePixelDoacao } from "@/lib/analytics/rastreamento";
 import "@/features/landing-doacao/landing.css";
 
 /** Layout da landing de doação, das páginas de retorno do pagamento e dos documentos (política e termos). */
 export function LandingLayout() {
-  const { pathname } = useLocation();
-  // GTM e aviso de cookies ficam no RootLayout; aqui só o Pixel da campanha
-  usePixelDoacao(pathname);
+  // GTM (com GA4 e Meta Pixel dentro) e aviso de cookies ficam no RootLayout
 
   // Ao voltar do Mercado Pago pelo "voltar", o Safari do iPhone restaura a página
   // do cache (bfcache) do jeito que ela estava ao sair: com a janela de doação

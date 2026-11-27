@@ -84,7 +84,7 @@ export function PoliticaPrivacidadePage() {
 
           <h2>4. Cookies</h2>
           <p>
-            Este&nbsp;site usa cookies não&nbsp;essenciais (Meta&nbsp;Pixel,&nbsp;Google&nbsp;Analytics, carregado
+            Este&nbsp;site usa cookies não&nbsp;essenciais (Meta&nbsp;Pixel e&nbsp;Google&nbsp;Analytics, carregados
             pelo&nbsp;Google&nbsp;Tag&nbsp;Manager) para&nbsp;medir campanhas e&nbsp;navegação, em&nbsp;todas
             as&nbsp;páginas, inclusive na&nbsp;Ação de&nbsp;Natal. Eles&nbsp;só&nbsp;são&nbsp;ativados depois do&nbsp;seu&nbsp;consentimento,
             através do&nbsp;banner de&nbsp;cookies exibido ao&nbsp;entrar no&nbsp;site. Você pode mudar sua&nbsp;escolha

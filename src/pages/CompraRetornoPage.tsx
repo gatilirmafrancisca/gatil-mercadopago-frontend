@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { consultarCompra, guardarReserva, reservaGuardada, type ResumoCompra } from "@/features/acao-natal/api"
 import { padNumber } from "@/lib/utils/format"
+import { registrarCompraRifa } from "@/lib/analytics/rastreamento"
 
 type Retorno = "aprovada" | "pendente" | "recusada"
 
@@ -30,7 +31,10 @@ export function CompraRetornoPage({ retorno }: { retorno: Retorno }) {
     try {
       const resumo = await consultarCompra(paymentId && paymentId !== "null" ? paymentId : null, ref)
       setCompra(resumo)
-      if (resumo.status === "PAGO" || resumo.status === "PAGO_PARCIAL") guardarReserva(null)
+      if (resumo.status === "PAGO" || resumo.status === "PAGO_PARCIAL") {
+        guardarReserva(null)
+        if (!resumo.teste) registrarCompraRifa(resumo.reservaId, resumo.numerosConfirmados.length || resumo.numeros.length, resumo.valor)
+      }
     } catch {
       setErro("Não conseguimos consultar sua compra agora. Tenta de novo em instantes.")
     } finally {
