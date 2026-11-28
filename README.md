@@ -72,22 +72,32 @@ gatil-frontend/
 | `VITE_API_MOCK` | Só em `npm run dev`: backend falso em memória (`src/mocks/mockApi.ts`). Nunca entra no build |
 | `VITE_GTM_ID` | Contêiner do Google Tag Manager (`GTM-5ZS5PP9K`). Só em Production na Vercel; vazio = sem GTM |
 | `VITE_GA4_ID` | ID de medição do GA4 configurado no GTM (`G-…`). Só serve para ler `client_id`/`session_id` e mandar ao backend |
-| `VITE_META_PIXEL_ID` | Meta Pixel, só nas páginas de doação |
 
 ## Rastreamento (GTM, GA4 e Meta Pixel)
 
-- **Site inteiro:** o `RootLayout` mostra o aviso de cookies e carrega o Google Tag Manager (`src/lib/analytics/gtm.ts`). Consent Mode v2 no **modo básico**: o `gtm.js` só é baixado depois que a pessoa aceita estatísticos ou marketing. Antes disso, nada do Google roda.
-- **GA4 fica dentro do GTM.** O site não carrega mais o `gtag.js` direto (contaria em dobro); ele só publica eventos no `dataLayer`:
+- **Um lugar só: o Google Tag Manager.** O `RootLayout` mostra o aviso de cookies e carrega o GTM em todas as páginas (`src/lib/analytics/gtm.ts`). Consent Mode v2 no **modo básico**: o `gtm.js` só é baixado depois que a pessoa aceita estatísticos ou marketing.
+- **GA4 e Meta Pixel são tags dentro do contêiner.** O site não carrega `gtag.js` nem `fbevents.js` direto (contaria em dobro). Ele só publica eventos no `dataLayer` (`src/lib/analytics/rastreamento.ts`):
 
-| Evento no `dataLayer` | Quando | Parâmetros |
-|---|---|---|
-| `page_view_spa` | Toda troca de página (o GTM não vê as navegações do SPA sozinho) | `page_location`, `page_path`, `page_title` |
-| `generate_lead` | Início da doação | `value`, `currency` |
-| `purchase` | Pix da doação aprovado na tela | `ecommerce.transaction_id`, `ecommerce.value`, `ecommerce.currency` |
+| Evento no `dataLayer` | Quando | Tag no GA4 | Tag no Meta | Parâmetros |
+|---|---|---|---|---|
+| `page_view_spa` | Toda troca de página (o GTM não vê as navegações do SPA sozinho) | `page_view` | `PageView` | `page_location`, `page_path`, `page_title` |
+| `generate_lead` | Doação: abriu o pagamento | `generate_lead` | `InitiateCheckout` | `value`, `currency`, `event_id` |
+| `doacao_concluida` | Doação: Pix aprovado na tela | **nenhuma** (o `purchase` da doação vem do backend) | `Donate` com Event ID = `event_id` | `value`, `currency`, `transaction_id`, `event_id` |
+| `begin_checkout` | Rifa: começou a compra (pagou primeiro) ou guardou os números (reserva) | `begin_checkout` | `InitiateCheckout` | `ecommerce.{value, currency, items}`, `event_id` |
+| `add_payment_info` | Rifa: Pix gerado ou foi para o cartão | `add_payment_info` | (opcional) `AddPaymentInfo` | `ecommerce.{value, currency, payment_type, items}`, `event_id` |
+| `purchase` | Rifa: pagamento aprovado (Pix na tela ou volta do cartão). Uma vez por compra | `purchase` | `Purchase` | `ecommerce.{transaction_id, value, currency, items}`, `event_id` |
 
-  No contêiner: Google tag do GA4 com `send_page_view = false`, tag de evento `page_view` no gatilho personalizado `page_view_spa`, e as demais tags de evento com "Enviar dados de e-commerce". As permissões chegam pelo Consent Mode (`analytics_storage` = estatísticos; `ad_storage`, `ad_user_data`, `ad_personalization` = marketing).
+  `items` da rifa: `item_id: "rifa-natal"`, `item_category: "rifa"`, `price`, `quantity` (números comprados). Pix de teste (`gatilPixTeste`) não gera eventos.
+
+- **Doação, sem duplicidade:**
+  - GA4: o `purchase` da doação sai **só do backend** (Measurement Protocol, `transaction_id` = rastreioId), quando o Mercado Pago aprova (Pix ou cartão). Não crie tag de `purchase` do GA4 para `doacao_concluida`.
+  - Meta: o `Donate` do navegador (GTM) e o da Conversions API (backend) usam o mesmo `event_id` (rastreioId): o Meta junta os dois. Na tag do Pixel no GTM, preencha o Event ID com a variável de camada de dados `event_id`.
+- **No contêiner:**
+  - Google tag do GA4 com `send_page_view = false` (senão a primeira página conta duas vezes) e tags de evento com "Enviar dados de e-commerce".
+  - Meta Pixel pelo modelo da galeria, com o ID do Pixel (o mesmo `META_PIXEL_ID` do backend), "Verificações de consentimento adicionais" = `ad_storage`, e o disparo automático de PageView por histórico desligado (usar o gatilho `page_view_spa`).
+  - Permissões pelo Consent Mode: `analytics_storage` = estatísticos; `ad_storage`, `ad_user_data`, `ad_personalization` = marketing.
 - **CSP:** tags "HTML personalizado" do GTM não rodam (a CSP não aceita script inline). Use os modelos nativos/da galeria; um domínio novo de script precisa entrar no `vercel.json`.
-- **Meta Pixel** continua no código, só no `LandingLayout` (campanha de doação).
+- **Para o backend atribuir a doação à visita**, o navegador manda junto do pagamento os cookies `_ga`/`_ga_<ID>` (só com estatísticos) e `_fbp`/`_fbc` (só com marketing), criados pelas tags do GTM.
 - O painel administrativo não tem rastreamento.
 
 ## Como rodar localmente
