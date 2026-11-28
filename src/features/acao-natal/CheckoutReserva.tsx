@@ -5,6 +5,7 @@ import type { PixCriado } from "@/features/pix/types"
 import { utmsAceitas } from "@/features/donation/utm"
 import { useUtmParams } from "@/hooks/useUtmParams"
 import { ApiRequestError } from "@/types/api"
+import { registrarCompraRifa, registrarInicioRifa, registrarPagamentoRifa } from "@/lib/analytics/rastreamento"
 import { A, ACAO } from "@/features/acao-natal/config"
 import { Turnstile, turnstileAtivo } from "@/features/acao-natal/Turnstile"
 import {
@@ -89,6 +90,7 @@ export function CheckoutReserva({ selected, onRemove, onRandom, onTaken, onCompl
 
   const concluir = useCallback((resumo: ResumoCompra) => {
     guardarReserva(null)
+    if (!resumo.teste) registrarCompraRifa(resumo.reservaId, resumo.numerosConfirmados.length || resumo.numeros.length, resumo.valor)
     setCompra(resumo)
     setEtapa("pronto")
     onComplete(resumo.numerosConfirmados)
@@ -171,6 +173,7 @@ export function CheckoutReserva({ selected, onRemove, onRandom, onTaken, onCompl
       }
       expirou.current = false
       guardarReserva(nova.reservaId)
+      if (!nova.teste) registrarInicioRifa(nova.numeros.length, nova.valor)
       setAgora(Date.now()); setReserva(nova); setPix(null); setEtapa("pagando")
     } catch (err) {
       if (err instanceof ApiRequestError && err.status === 409) {
@@ -206,8 +209,10 @@ export function CheckoutReserva({ selected, onRemove, onRandom, onTaken, onCompl
       if (payment === "pix") {
         setPix(await criarPixReserva(reserva.reservaId, dados))
         setEtapa("pix")
+        if (!reserva.teste) registrarPagamentoRifa("pix", reserva.numeros.length, reserva.valor)
       } else {
         const { initPoint } = await criarPagamentoCartaoReserva(reserva.reservaId, dados)
+        if (!reserva.teste) registrarPagamentoRifa("cartao", reserva.numeros.length, reserva.valor)
         window.location.href = initPoint
         return
       }

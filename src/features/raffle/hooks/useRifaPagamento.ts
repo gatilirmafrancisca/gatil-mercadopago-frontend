@@ -8,6 +8,7 @@ import type { PixCriado } from "@/features/pix/types";
 import { utmsAceitas } from "@/features/donation/utm";
 import { RAFFLE_ROUTES, TICKET_PRICE_BRL } from "@/features/raffle/constants";
 import { ApiRequestError } from "@/types/api";
+import { registrarInicioRifa, registrarPagamentoRifa } from "@/lib/analytics/rastreamento";
 
 export type FormaPagamentoRifa = "pix" | "cartao";
 
@@ -93,7 +94,9 @@ export function useRifaPagamento({ utm }: UseRifaPagamentoArgs) {
 
   async function gerarPix() {
     try {
-      setPix(await criarPixRifa({ email: email.trim(), ...(await utmsAceitas(utm)) }));
+      const criado = await criarPixRifa({ email: email.trim(), ...(await utmsAceitas(utm)) });
+      setPix(criado);
+      if (!modoTeste) registrarPagamentoRifa("pix", 1, criado.valor);
     } catch (err) {
       setSubmitError(mensagemDeErro(err, "Não conseguimos gerar o Pix agora. Tenta de novo em instantes."));
     } finally {
@@ -106,6 +109,7 @@ export function useRifaPagamento({ utm }: UseRifaPagamentoArgs) {
 
     setIsSubmitting(true);
     setSubmitError(null);
+    if (!modoTeste) registrarInicioRifa(1, TICKET_PRICE_BRL);
 
     if (usaPix) {
       await gerarPix();
@@ -114,6 +118,7 @@ export function useRifaPagamento({ utm }: UseRifaPagamentoArgs) {
 
     try {
       const { initPoint } = await criarPagamentoRifa(await utmsAceitas(utm));
+      registrarPagamentoRifa("cartao", 1, TICKET_PRICE_BRL);
       window.location.href = initPoint;
     } catch (err) {
       setSubmitError(

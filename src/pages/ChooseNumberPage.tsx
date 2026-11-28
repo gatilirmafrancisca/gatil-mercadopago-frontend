@@ -22,6 +22,7 @@ import {
   TOTAL_NUMBERS,
 } from "@/features/raffle/constants";
 import { formatCurrencyBRL, padNumber } from "@/lib/utils/format";
+import { registrarCompraRifa } from "@/lib/analytics/rastreamento";
 
 interface LoaderData {
   token: string | null;
@@ -40,6 +41,8 @@ export async function chooseNumberLoader({ request }: LoaderFunctionArgs): Promi
 
   try {
     const { token } = await verificarPagamento(paymentId);
+    // Pagamento aprovado (Pix na tela ou volta do cartão): a compra da rifa
+    registrarCompraRifa(paymentId, 1, TICKET_PRICE_BRL);
     return { token, alreadyClaimedNumber: null, tokenReenvio: null };
   } catch (err) {
     if (err instanceof ApiRequestError && err.status === 409) {
